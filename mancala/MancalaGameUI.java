@@ -1,3 +1,6 @@
+
+// game de programme vs humain
+
 package GameSearch.mancala;
 
 import javax.swing.*;
@@ -15,6 +18,8 @@ public class MancalaGameUI extends JFrame {
     private MancalaPosition position;
     private boolean humanTurn;
 
+
+
     public MancalaGameUI() {
         game = new Mancala();
         selectDifficulty();  // User selects difficulty level
@@ -25,7 +30,7 @@ public class MancalaGameUI extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
     }
-
+//Configure l'interface utilisateur principale de l'application Mancala
     private void setupUI() {
         setTitle("Mancala Game: Human vs Computer");
         setDefaultCloseOperation(EXIT_ON_CLOSE);

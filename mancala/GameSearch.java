@@ -4,28 +4,39 @@ import java.util.*;
 
 public abstract class GameSearch {
     public static final boolean DEBUG = false;
-    /*
-     * Note: the abstract Position also needs to be
-     *       subclassed to write a new game program.
-     */
-    /*
-     * Note: the abstract class Move also needs to be subclassed.
-     *
-     */
+
     public static boolean PROGRAM = false;
     public static boolean HUMAN = true;
+
+    // Vérifie si la position est une position nulle (égalité).
     public abstract boolean drawnPosition(Position p);
+
+    // Vérifie si un joueur a gagné dans la position donnée.
     public abstract boolean wonPosition(Position p, boolean player);
+
+    // Évalue une position et retourne un score pour un joueur donné.
     public abstract float positionEvaluation(Position p, boolean player);
+
+    // Affiche l'état actuel de la position.
     public abstract void printPosition(Position p);
+
+    // Retourne les mouvements possibles pour un joueur à partir d'une position donnée.
     public abstract Position [] possibleMoves(Position p, boolean player);
+
+    // Effectue un mouvement et retourne la nouvelle position.
     public abstract Position makeMove(Position p, boolean player, Move move);
+
+    // Vérifie si la profondeur maximale a été atteinte pour l'alpha-bêta.
     public abstract boolean reachedMaxDepth(Position p, int depth);
-    public abstract Move createMove();
+
+    // Exécute l'algorithme alpha-bêta pour évaluer la meilleure position.
     protected List<Object> alphaBeta(int depth, Position p, boolean player) {
         return alphaBetaHelper(depth, p, player, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
     }
+
+    // Fonction récursive qui applique l'algorithme alpha-bêta pour trouver le meilleur mouvement.
     protected List<Object> alphaBetaHelper(int depth, Position p, boolean player, float alpha, float beta) {
+        // Si la profondeur maximale est atteinte ou que la position est nulle, on retourne l'évaluation.
         if (reachedMaxDepth(p, depth) || drawnPosition(p)) {
             float eval = positionEvaluation(p, player);
             return Arrays.asList(eval, null); // Score et pas de mouvement
@@ -56,16 +67,19 @@ public abstract class GameSearch {
         bestMove.add(0, bestValue); // Ajouter le score en premier
         return bestMove;
     }
-    // Helper function to get the pit index from the best move
+
+    // Fonction utilitaire pour obtenir l'indice du puits dans le meilleur mouvement.
     private int getPitIndex(MancalaPosition current, MancalaPosition best) {
         for (int i = 0; i < 6; i++) {
             if (!Arrays.equals(current.board, best.board)) {
-                return i; // Return the index of the pit where the move was made
+                return i; // Retourner l'indice du puits où le mouvement a été effectué
             }
         }
 
-        return -1; // Should not occur
+        return -1;
     }
+
+    // Trouve l'indice du meilleur puits pour un mouvement donné.
     private int getBestMovePitIndex(MancalaPosition current, MancalaPosition best, boolean player) {
         int start = player ? 0 : 7;
         int end = player ? 5 : 12;
@@ -83,6 +97,7 @@ public abstract class GameSearch {
         return -1; // Aucun mouvement valide trouvé
     }
 
+    // Fonction principale pour jouer une partie de Mancala.
     public void playGame(Position startingPosition, boolean humanPlayFirst, boolean playAgainstComputer) {
         Scanner scanner = new Scanner(System.in);
         MancalaPosition pos = (MancalaPosition) startingPosition;
@@ -109,7 +124,7 @@ public abstract class GameSearch {
                 break;
             }
 
-            if (currentPlayer == HUMAN) { // Human Player (Player 1)
+            if (currentPlayer == HUMAN) { // Tour du joueur humain (Joueur 1)
                 System.out.println("Human's turn! (Type 'options' for save/load/quit, or enter help, or enter pit index 0-5)");
                 String input = scanner.next();
 
@@ -187,7 +202,7 @@ public abstract class GameSearch {
                     System.out.println("Invalid input. Enter a number between 0 and 5.");
                 }
             } else {
-                if (playAgainstComputer) { // Computer (PROGRAM)
+                if (playAgainstComputer) { // Ordinateur (PROGRAM)
                     System.out.println("Computer's turn!");
                     List<Object> result = alphaBeta(0, pos, PROGRAM);
                     MancalaPosition bestMove = (MancalaPosition) result.get(1);
@@ -198,68 +213,27 @@ public abstract class GameSearch {
                     } else {
                         System.out.println("Computer gets another turn!");
                     }
-                } else { // Player 2
+                } else { // Joueur 2
                     while (true) { // Boucle pour Player 2
+                        System.out.println("Player 2's turn! (enter pit index 7-12)");
+                        String input = scanner.next();
+
                         try {
-                            System.out.println("Player 2's turn! (Type 'options' for save/load/quit, or enter pit index 0-5)");
-                            String input = scanner.next();
-
-                            if ("options".equalsIgnoreCase(input)) { // Options pour Player 2
-                                System.out.println("Options: (1) Save Game (2) Load Game (3) Quit");
-                                int option = scanner.nextInt();
-                                switch (option) {
-                                    case 1:
-                                        System.out.print("Enter filename to save the game: ");
-                                        String saveFile = scanner.next();
-                                        ((Mancala) this).saveGame(pos, saveFile);
-                                        System.out.println("Game saved.");
-                                        continue;
-                                    case 2:
-                                        System.out.print("Enter filename to load the game: ");
-                                        String loadFile = scanner.next();
-                                        MancalaPosition loadedPos = ((Mancala) this).loadGame(loadFile);
-                                        if (loadedPos != null) {
-                                            pos = loadedPos;
-                                            currentPlayer = humanPlayFirst; // Revenir à l'ordre initial
-                                        }
-                                        continue;
-                                    case 3:
-                                        System.out.println("Exiting the game. Goodbye!");
-                                        return;
-                                    default:
-                                        System.out.println("Invalid option. Continuing the game...");
-                                }
-                                continue;
-                            }
-
                             int pit = Integer.parseInt(input);
-                            if (pit < 0 || pit > 5) {
-                                System.out.println("Invalid input: Enter a number between 0 and 5.");
+                            if (pit < 7 || pit > 12 || pos.board[pit] == 0) {
+                                System.out.println("Invalid move: The selected pit is empty or out of range. Try again.");
                                 continue;
                             }
-
-                            int mappedPit = pit + 7;
-                            if (pos.board[mappedPit] == 0) {
-                                System.out.println("Invalid move: The selected pit is empty. Try again.");
-                                continue;
-                            }
-
-                            Move move = new MancalaMove(mappedPit);
-                            pos = (MancalaPosition) makeMove(pos, PROGRAM, move);
-
-                            if (!pos.extraTurn) {
-                                currentPlayer = HUMAN; // Retourner à Player 1
-                            } else {
-                                System.out.println("Player 2 gets another turn!");
-                            }
+                            Move move = new MancalaMove(pit);
+                            pos = (MancalaPosition) makeMove(pos, !HUMAN, move);
+                            currentPlayer = HUMAN; // Retourner à Human
                             break;
                         } catch (NumberFormatException e) {
-                            System.out.println("Invalid input. Please enter a valid number between 0 and 5.");
-                            scanner.nextLine(); // Consommer la ligne restante
+                            System.out.println("Invalid input. Enter a number between 7 and 12.");
                         }
                     }
                 }
             }
-   }
-}
+        }
+    }
 }
