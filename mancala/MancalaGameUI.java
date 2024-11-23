@@ -52,7 +52,7 @@ public class MancalaGameUI extends JFrame {
             boardPanel.add(programPits[i]);
         }
 
-        // Symmetry placeholders
+
         boardPanel.add(new JLabel(""));
         boardPanel.add(new JLabel(""));
 

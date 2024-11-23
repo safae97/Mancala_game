@@ -7,6 +7,7 @@ public class MancalaMove extends Move {
         this.pitIndex = pitIndex;
     }
 
+
     @Override
     public String toString() {
         return "Move pit: " + pitIndex;

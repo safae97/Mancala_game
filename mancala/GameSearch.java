@@ -63,6 +63,7 @@ public abstract class GameSearch {
                 return i; // Return the index of the pit where the move was made
             }
         }
+
         return -1; // Should not occur
     }
     private int getBestMovePitIndex(MancalaPosition current, MancalaPosition best, boolean player) {
